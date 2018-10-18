@@ -4,7 +4,7 @@
 
 #include "readmap.h"
 
-int getheap(int pid, long* regionstart, long* regionend) {
+int getheap(int pid, struct Region* region) {
   // Make string for the path to maps
   char filename[128];
   snprintf(filename, sizeof(filename), "/proc/%d/maps", pid);
@@ -40,8 +40,8 @@ int getheap(int pid, long* regionstart, long* regionend) {
   char *addr1, *addr2;
   addr1 = strtok(lineptr, " -");
   addr2 = strtok(NULL, " -");
-  *regionstart = (long)strtol(addr1, NULL, 16);
-  *regionend = (long)strtol(addr2, NULL, 16);
+  region->start = (long)strtol(addr1, NULL, 16);
+  region->end = (long)strtol(addr2, NULL, 16);
   
   // Success, so free memory and return true
   free(lineptr);

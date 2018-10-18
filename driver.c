@@ -10,13 +10,13 @@
 #include "readmap.h"
 #include "ptrace.h"
 
-#define PID 4314            // Default PID to scan from
+#define PID 3535            // Default PID to scan from
 
 int main()
 {
   // Get the start and end regions of the heap
-  long regionstart, regionend;
-  if (getheap(PID, &regionstart, &regionend) == 0) {
+  struct Region region;
+  if (getheap(PID, &region) == 0) {
     printf("Could not find the heap");
     return 0;
   }
@@ -24,7 +24,7 @@ int main()
   // Get the int values in that region
   int* results;
   int size;
-  if (scanInt32(PID, regionstart, regionend, &results, &size) == 0) {
+  if (scanInt32(PID, region, &results, &size) == 0) {
     printf("Counldn't get the ints\n");
     return 0;
   }
@@ -32,7 +32,7 @@ int main()
   for (int i = 0; i < size; i+=4)
     printf("%d\t%d\t%d\t%d\n", results[i], results[i+1], results[i+2], results[i+3]);
   
-  printf("\nRegion: %ld<->%ld\n", regionstart, regionend);
+  printf("\nRegion: %ld<->%ld\n", region.start, region.end);
   printf("Values found: %d\n", size);
   return 0;
 }

@@ -1,1 +1,3 @@
-int getheap(int pid, long* regionstart, long* regionend);
+#include "structs.h"
+
+int getheap(int pid, struct Region* region);

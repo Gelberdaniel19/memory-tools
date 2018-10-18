@@ -11,7 +11,7 @@
 
 #define BUFSIZE 4096        // Buffer size when reading from mem
 
-int scanInt32(pid_t pid, long regionstart, long regionend, int** results, int* size)
+int scanInt32(pid_t pid, struct Region region, int** results, int* size)
 {
   // Initial memory allocation to allow reallocation later.
   *results = malloc(4);
@@ -28,10 +28,10 @@ int scanInt32(pid_t pid, long regionstart, long regionend, int** results, int* s
   waitpid(pid, NULL, 0);
 
   // Read memory from file
-  long offset = regionstart;
+  long offset = region.start;
   *size = 0;
   int valuesfilled = 0;
-  while (offset < regionend) {
+  while (offset < region.end) {
     pread(fd, buf, sizeof(buf), offset);
     // Allocate more space in the array so that the buffer's bytes fit   
     *results = realloc(*results, BUFSIZE+(*size*sizeof(int)));

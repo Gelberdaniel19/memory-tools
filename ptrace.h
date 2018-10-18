@@ -1,3 +1,5 @@
 #include <sys/types.h>
 
-int scanInt32(pid_t pid, long regionstart, long regionend, int** results, int* size);
+#include "structs.h"
+
+int scanInt32(pid_t pid, struct Region region, int** results, int* size);
