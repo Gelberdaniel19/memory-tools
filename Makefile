@@ -1,4 +1,3 @@
 compile: 
-	@gcc -o out readmap.c driver.c
+	@gcc -o out readmap.c driver.c ptrace.c
 	@./out
-	@echo "\nComplete"
