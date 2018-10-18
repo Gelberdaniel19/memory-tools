@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <sys/ptrace.h>
 #include <sys/types.h>
@@ -8,8 +9,51 @@
 
 #include "readmap.h"
 
-#define PID 5339
-#define BUFSIZE 4096
+#define PID 4314            // Default PID to scan from
+#define BUFSIZE 4096        // Buffer size when reading from mem
+
+int scanInt32(pid_t pid, long regionstart, long regionend, int** results, int* size)
+{
+  // Initial memory allocation to allow reallocation later.
+  *results = malloc(4);
+  
+  // Set up for reading from mem file
+  char memstring[64];
+  printf(memstring, sizeof(memstring), "/proc/%d/mem", pid);
+  char buf[BUFSIZE];
+  int fd = open(memstring, O_RDONLY);
+  if (ptrace(PTRACE_ATTACH, pid, NULL, NULL) == -1) {
+    printf("Could not read mem\n");
+    return 0;
+  }
+  waitpid(pid, NULL, 0);
+
+  // Read memory from file
+  long offset = regionstart;
+  *size = 0;
+  int valuesfilled = 0;
+  while (offset < regionend) {
+    pread(fd, buf, sizeof(buf), offset);
+    // Allocate more space in the array so that the buffer's bytes fit   
+    *results = realloc(*results, BUFSIZE+(*size*sizeof(int)));
+    if (*results == NULL) {
+      printf("Error reallocating memory");
+      return 0;
+    }
+    *size += BUFSIZE / sizeof(int);
+    for (int i = 0; i < BUFSIZE; i += sizeof(int)) {
+      int value = buf[i] | ((int)buf[i+1] << 8) | ((int)buf[i+2] << 16) | ((int)buf[i+3] << 24);
+      (*results)[valuesfilled] = value;
+      valuesfilled += 1;
+    }
+    offset += BUFSIZE;
+  }
+
+  // Wrap up
+  *size = valuesfilled;
+  ptrace(PTRACE_DETACH, pid, NULL, NULL);
+  return 1;
+}
 
 int main()
 {
@@ -19,30 +63,13 @@ int main()
     printf("%ld-%ld\n", regionstart, regionend);
   }
 
-  // Set up for reading from mem file
-  pid_t pid = PID;
-  char memstring[128];
-  snprintf(memstring, sizeof(memstring), "/proc/%d/mem", PID);
-  char buf[BUFSIZE];
-  int fd = open(memstring, O_RDWR);
-  long attached = ptrace(PTRACE_ATTACH, pid, NULL, NULL);
-  waitpid(PID, NULL, 0);
-
-  // Read from mem file
-  long offset = regionstart;
-  while (offset < regionend) {
-    pread(fd, buf, sizeof(buf), offset);
-    for (int i = 0; i < BUFSIZE; i+=sizeof(int)) {
-      if (buf[i] == 0 && buf[i+1] == 0 && buf[i+2] == 0 && buf[i+3] == 0)
-	continue;
-      int value = buf[i] | ( (int)buf[i+1] << 8 ) | ( (int)buf[i+2] << 16 ) | ( (int)buf[i+3] << 24 );
-      if (value == 72)
-	printf("%d %d %d %d\t%d\t%ld\n", buf[i], buf[i+1], buf[i+2], buf[i+3], value, offset+i);
-    }
-    offset += BUFSIZE;
-  }
-
-  // Wrap up
-  ptrace(PTRACE_DETACH, pid, NULL, NULL);
+  // Get the int values in that region
+  int* results;
+  int size;
+  if (scanInt32(PID, regionstart, regionend, &results, &size) == 0)
+    printf("Counldn't get the ints\n");
+  
+  printf("Region: %ld<->%ld\n", regionstart, regionend);
+  printf("Values found: %d\n", size);
+  return 0;
 }
-
