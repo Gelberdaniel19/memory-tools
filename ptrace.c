@@ -11,10 +11,10 @@
 
 #define BUFSIZE 4096        // Buffer size when reading from mem
 
-int scanInt32(pid_t pid, struct Region region, int** results, int* size)
+int scanInt32(pid_t pid, struct Region region, struct I32Address** results, int* size)
 {
   // Initial memory allocation to allow reallocation later.
-  *results = malloc(4);
+  *results = malloc(16);     // 4 is arbitrary
   
   // Set up for reading from mem file
   char memstring[64];
@@ -34,7 +34,7 @@ int scanInt32(pid_t pid, struct Region region, int** results, int* size)
   while (offset < region.end) {
     pread(fd, buf, sizeof(buf), offset);
     // Allocate more space in the array so that the buffer's bytes fit   
-    *results = realloc(*results, BUFSIZE+(*size*sizeof(int)));
+    *results = realloc(*results, (BUFSIZE / sizeof(int) * sizeof(struct I32Address)) + (*size * sizeof(struct I32Address)));
     if (*results == NULL) {
       printf("Error reallocating memory");
       return 0;
@@ -42,7 +42,8 @@ int scanInt32(pid_t pid, struct Region region, int** results, int* size)
     *size += BUFSIZE / sizeof(int);
     for (int i = 0; i < BUFSIZE; i += sizeof(int)) {
       int value = buf[i] | ((int)buf[i+1] << 8) | ((int)buf[i+2] << 16) | ((int)buf[i+3] << 24);
-      (*results)[valuesfilled] = value;
+      results[valuesfilled]->value = value;
+      results[valuesfilled]->addr = offset + i;
       valuesfilled += 1;
     }
     offset += BUFSIZE;

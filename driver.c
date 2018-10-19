@@ -22,7 +22,7 @@ int main()
   }
 
   // Get the int values in that region
-  int* results;
+  struct I32Address* results;
   int size;
   if (scanInt32(PID, region, &results, &size) == 0) {
     printf("Counldn't get the ints\n");
@@ -30,7 +30,7 @@ int main()
   }
 
   for (int i = 0; i < size; i+=4)
-    printf("%d\t%d\t%d\t%d\n", results[i], results[i+1], results[i+2], results[i+3]);
+    printf("%d\t%d\t%d\t%d\n", results[i].value, results[i+1].value, results[i+2].value, results[i+3].value);
   
   printf("\nRegion: %ld<->%ld\n", region.start, region.end);
   printf("Values found: %d\n", size);
