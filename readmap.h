@@ -1,3 +1,3 @@
 #include "structs.h"
 
-int getheap(int pid, struct Region* region);
+int getRegions(int pid, struct Region** regions, int* size);

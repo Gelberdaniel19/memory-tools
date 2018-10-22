@@ -4,7 +4,11 @@
 
 #include "readmap.h"
 
-int getheap(int pid, struct Region* region) {
+int getRegions(int pid, struct Region** regions, int* size) {
+  // Size starts at zero, and initialize region
+  *size = 0;
+  *regions = malloc(sizeof(struct Region));
+
   // Make string for the path to maps
   char filename[128];
   snprintf(filename, sizeof(filename), "/proc/%d/maps", pid);
@@ -16,34 +20,23 @@ int getheap(int pid, struct Region* region) {
     return 0;
   }
 
-  // Create a line pointer and attempt to read a line
+  // Create a line pointer and attempt to read all lines
   char* lineptr = NULL;
   size_t len = 0;
   ssize_t readlen;
   int found = 0;
   while ((readlen = getline(&lineptr, &len, maps)) != -1) {
-    if (strstr(lineptr, "[heap]") != NULL) {
-      found = 1;
-      break;
-    }
+    // Parse all the lins for the addresses
+    *regions = realloc(*regions, (*size + 1) * sizeof(struct Region));
+    char *addr1, *addr2;
+    addr1 = strtok(lineptr, " -");
+    addr2 = strtok(NULL, " -");
+    ((*regions)+*size)->start = (long)strtol(addr1, NULL, 16);
+    ((*regions)+*size)->end = (long)strtol(addr2, NULL, 16);
+    *size += 1;
   }
-
-  // Return false if not found
-  if (found == 0) {
-    free(lineptr);
-    fclose(maps);
-    return 0;
-  }
-
-  // This is the hard part - Parse the line.
-  // Get the memory addresses as char arrays
-  char *addr1, *addr2;
-  addr1 = strtok(lineptr, " -");
-  addr2 = strtok(NULL, " -");
-  region->start = (long)strtol(addr1, NULL, 16);
-  region->end = (long)strtol(addr2, NULL, 16);
   
-  // Success, so free memory and return true
+  // Success, wrap up
   free(lineptr);
   fclose(maps);
   return 1;  
