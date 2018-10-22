@@ -10,7 +10,7 @@
 #include "readmap.h"
 #include "ptrace.h"
 
-#define PID 3535            // Default PID to scan from
+#define PID 27949
 
 int main()
 {
@@ -29,8 +29,8 @@ int main()
     return 0;
   }
 
-  for (int i = 0; i < size; i+=4)
-    printf("%d\t%d\t%d\t%d\n", results[i].value, results[i+1].value, results[i+2].value, results[i+3].value);
+  //  for (int i = 0; i < size; i+=4)
+  //    printf("%d\t%d\t%d\t%d\n", results[i].value, results[i+1].value, results[i+2].value, results[i+3].value);
   
   printf("\nRegion: %ld<->%ld\n", region.start, region.end);
   printf("Values found: %d\n", size);

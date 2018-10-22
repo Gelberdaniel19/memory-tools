@@ -16,7 +16,7 @@ At the current time, this program is not intended to be run on anyone else's mac
 * [x] Get some sort of output from reading a memory address
 * [x] Read an entire memory region from /proc/$PID/mem using a buffer
 * [x] Read an entire memory region as I32
-* [ ] Replace the array of values with an array of structs containing an address and value
-* [ ] Read an entire memory region as I8, I16, I32, I64, float, double
-* [ ] Get list of all memory regions as a struct
-* [ ] Scan all memory regions for any data type
+* [x] Replace the array of values with an array of structs containing an address and value
+* [ ] Read an entire memory region as I8, I16, I32, I64, float, or double
+* [ ] Get list of all memory regions as an array
+* [ ] Scan all memory regions for any given data type
