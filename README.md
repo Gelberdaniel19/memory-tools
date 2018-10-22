@@ -18,5 +18,5 @@ At the current time, this program is not intended to be run on anyone else's mac
 * [x] Read an entire memory region as I32
 * [x] Replace the array of values with an array of structs containing an address and value
 * [x] Read an entire memory region as I8, I16, I32, I64, float, or double
-* [ ] Get list of all memory regions as an array
+* [x] Get list of all memory regions as an array
 * [ ] Scan all memory regions for any given data type
